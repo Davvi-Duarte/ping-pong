@@ -94,6 +94,13 @@
             human: 2,
             computer: 1,
 
+            increaseHuman: function(){
+                this.human ++
+            },
+
+            increaseComputer: function(){
+                this.computer ++
+            },
 
             draw: function(){
                 canvasCtx.font ="bold 72px Arial"
@@ -109,8 +116,8 @@
 
         //objeto bola
         const ball = {
-            x:200,
-            y:300,
+            x:0,
+            y:0,
             r:20,
             init: 0,
             end: 2 * Math.PI,
@@ -118,10 +125,55 @@
             //multiplicador de velocidade
             speed: 10,
 
+            //lógica de colisao
+
+            directionY: 1,
+            directionX: 1, 
+            _calcPosition: function(){
+                //verifica ponto humano
+                if(this.x > field.w - this.r - rightPaddle.w - gapX){
+                    //veerifica se a raquete direita ta na altura da bola
+                    if(
+                    this.y + this.r > rightPaddle.y && 
+                    this.y - this.r < rightPaddle.y + rightPaddle.h){
+
+                        //rebate a  bola invertendo X
+                        this._reverseX()
+                    }else{
+                        //pontua humano
+                        scoreboard.increaseHuman()
+                        this._pointUp()
+                    }
+                }
+
+                //verifica laterais superior e inferior
+                if(
+                (this.y - this.r < 0 && this.directionY < 0 ) ||
+                (this.y > field.h - this.r && this.directionY > 0)
+                
+                ){
+                    //rebate a bola invertendo o eixo Y
+                    this._reverseY()
+                }
+            },
+
+            _reverseY: function(){
+                this.directionY *= -1
+            },
+            _reverseX: function(){
+                this.directionX *= -1
+            },
+
+            //centraliza bola depois de fazer ponto
+            _pointUp: function(){
+                this.x = field.w/2
+                this.y = field.h/2
+            },
+
             //lógica de movimentação da bolinha
             _move: function(){
-                this.x += 1 * this.speed;
-                this.y += 1 * this.speed;
+                this.x += this.directionX * this.speed;
+                this.y += this.directionY * this.speed;
             },
 
             draw: function(){
@@ -130,6 +182,7 @@
                 canvasCtx.arc(this.x,this.y,this.r,this.init,this.end,false)
                 canvasCtx.fill()
                 
+                this._calcPosition()
                 this._move()
             },
         }
